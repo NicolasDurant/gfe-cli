@@ -1,7 +1,7 @@
 {
   "name": "gfe",
   "version": "0.0.1",
-  "description": "gfe CLI",
+  "description": "GFE cli tool for company internal use",
   "private": true,
   "types": "build/types/types.d.ts",
   "bin": {

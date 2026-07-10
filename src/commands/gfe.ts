@@ -1,14 +1,15 @@
 import { GluegunCommand } from 'gluegun'
-import { box, intro, outro } from '@clack/prompts'
+import { box, intro, log, outro } from '@clack/prompts'
 
 const command: GluegunCommand = {
   name: 'gfe',
   run: async (toolbox) => {
-    const { print } = toolbox
-    intro(print.colors.warning('GFE CLI'))
+    const { meta, print } = toolbox
+    intro(print.colors.warning('GFE cli'))
     box(
-      `
-      `,
+      `${meta.packageJSON().description} \n` +
+        `Version: v${meta.version()} \n` +
+        `Path: ${meta.src} \n`,
       '',
       {
         contentAlign: 'left',
@@ -18,7 +19,8 @@ const command: GluegunCommand = {
         formatBorder: (border) => print.colors.warning(border),
       }
     )
-    outro()
+    log.warn('Use `gfe --help` to see all available commands')
+    outro('Made with ❤️ by Nicolas Durant')
   },
 }
 

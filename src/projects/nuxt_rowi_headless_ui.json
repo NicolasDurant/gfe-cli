@@ -1,0 +1,11 @@
+{
+    "name": "nuxt_rowi_headless_ui",
+    "alias": "ROWI Frontend",
+    "command": "rowi",
+    "repository": {
+        "type": "git",
+        "url": "",
+        "targetBranch": "develop",
+        "monorepo": "frontend"
+    }
+}

@@ -1,0 +1,11 @@
+{
+    "name": "kundenanfragenmanagement",
+    "alias": "KuMa",
+    "command": "tkv",
+    "repository": {
+        "type": "git",
+        "url": "",
+        "targetBranch": "develop",
+        "monorepo": "both"
+    }
+}
