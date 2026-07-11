@@ -16,7 +16,7 @@ const command: GluegunCommand = {
           'Could not determine the root directory of the repository.'
         )
       }
-      intro("Let's initialize the GFE cli configuration file (.gfe.json):")
+      intro("🛠️ Let's initialize the GFE cli configuration file (.gfe.json):")
       if (filesystem.exists(`${whoami}/.gfe.json`)) {
         log.warning(
           `A GFE configuration file already exists at ${print.colors.warning(
