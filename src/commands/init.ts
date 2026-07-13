@@ -15,22 +15,15 @@ const command: GluegunCommand = {
   description: 'Init the GFE cli configuration file',
   name: 'init',
   run: async (toolbox) => {
-    const { filesystem, meta, print, gfe } = toolbox
+    const { filesystem, print, gfe } = toolbox
     try {
-      // #region System check
-      const whoami = meta.src ? meta.src.replace('/src', '') : undefined
-      if (!whoami) {
-        throw new Error(
-          'Could not determine the root directory of the repository.'
-        )
-      }
-      // #endregion
+      const packageRoot = gfe.getPackageRoot()
       intro("🛠️ Let's initialize the GFE cli configuration file (.gfe.json):")
       // #region Check for existing configuration file
-      if (filesystem.exists(`${whoami}/.gfe.json`)) {
+      if (filesystem.exists(`${packageRoot}/.gfe.json`)) {
         log.warning(
           `A GFE configuration file already exists at ${print.colors.warning(
-            `${whoami}/.gfe.json`
+            `${packageRoot}/.gfe.json`
           )}.`
         )
         const hasConfirmedOverwrite = await confirm({
@@ -88,12 +81,22 @@ const command: GluegunCommand = {
             return undefined
           },
         })
+        const email = await text({
+          message: 'Enter your Factorial work email:',
+          validate: (value) => {
+            if (!value || value.trim() === '') {
+              return 'Work email cannot be empty.'
+            }
+            return undefined
+          },
+        })
         gfeConfig.factorial = {
           apiKey: String(apiKey),
           apiBaseUrl: String(apiBaseUrl),
+          email: String(email),
         }
       }
-      filesystem.write(`${whoami}/.gfe.json`, gfeConfig, { jsonIndent: 2 })
+      filesystem.write(`${packageRoot}/.gfe.json`, gfeConfig, { jsonIndent: 2 })
       // #endregion
       outro(`Initialization complete!`)
     } catch (error) {

@@ -1,8 +1,46 @@
+import * as path from 'path'
 import { GluegunToolbox } from 'gluegun'
-import { path, select } from '@clack/prompts'
-import type { GFEProject, GFEProjectPaths } from '../types'
+import { path as clackPath, select } from '@clack/prompts'
+import type { GFEConfig, GFEProject, GFEProjectPaths } from '../types'
 
 module.exports = (toolbox: GluegunToolbox) => {
+  /**
+   * Resolves the GFE package root from where the CLI code lives.
+   * @returns The path to the GFE package root.
+   */
+  function getPackageRoot(): string {
+    const { meta } = toolbox
+    if (!meta.src) {
+      throw new Error('Could not determine the root directory of the GFE cli.')
+    }
+    return meta.src.replace('/src', '')
+  }
+
+  /**
+   * Returns the path to `.gfe.json` beside the GFE package root.
+   * @returns The path to `.gfe.json` or `null` if not found.
+   */
+  function findConfigPath(): string | null {
+    const { filesystem } = toolbox
+    const configPath = path.join(getPackageRoot(), '.gfe.json')
+    if (filesystem.exists(configPath)) {
+      return configPath
+    }
+    return null
+  }
+
+  /**
+   * Loads the GFE configuration from the nearest `.gfe.json` file.
+   * @returns The GFE configuration.
+   */
+  function loadConfig(): GFEConfig {
+    const configPath = findConfigPath()
+    if (!configPath) {
+      throw new Error('No .gfe.json found. Run `gfe init` first.')
+    }
+    return toolbox.filesystem.read(configPath, 'json') as GFEConfig
+  }
+
   /**
    * Fetches the list of GFE projects from the `src/projects` directory.
    * @returns  A promise that resolves to an array of GFEProject objects.
@@ -32,7 +70,7 @@ module.exports = (toolbox: GluegunToolbox) => {
     projects: GFEProject[] = []
   ): Promise<GFEProjectPaths> {
     const { filesystem } = toolbox
-    const repositoriesPath = await path({
+    const repositoriesPath = await clackPath({
       message: 'Where is your installation path of GFE repositories?',
       root: filesystem.homedir(),
       directory: true,
@@ -94,5 +132,11 @@ module.exports = (toolbox: GluegunToolbox) => {
     }
   }
 
-  toolbox.gfe = { getProjects, collectUserRepositoryProjects }
+  toolbox.gfe = {
+    collectUserRepositoryProjects,
+    findConfigPath,
+    getPackageRoot,
+    getProjects,
+    loadConfig,
+  }
 }
