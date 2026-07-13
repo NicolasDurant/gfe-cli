@@ -3,6 +3,10 @@ import { path, select } from '@clack/prompts'
 import type { GFEProject, GFEProjectPaths } from '../types'
 
 module.exports = (toolbox: GluegunToolbox) => {
+  /**
+   * Fetches the list of GFE projects from the `src/projects` directory.
+   * @returns  A promise that resolves to an array of GFEProject objects.
+   */
   async function getProjects(): Promise<GFEProject[]> {
     const { filesystem, meta } = toolbox
     const projectsPath = `${meta.src}/projects`
@@ -19,6 +23,11 @@ module.exports = (toolbox: GluegunToolbox) => {
     return projects
   }
 
+  /**
+   * Collects the paths of user repositories that match the given GFE projects.
+   * @param projects An array of GFEProject objects to match against.
+   * @returns A promise that resolves to a GFEProjectPaths object mapping project names to their paths.
+   */
   async function collectUserRepositoryProjects(
     projects: GFEProject[] = []
   ): Promise<GFEProjectPaths> {
@@ -84,5 +93,6 @@ module.exports = (toolbox: GluegunToolbox) => {
       return userProjectPaths
     }
   }
+
   toolbox.gfe = { getProjects, collectUserRepositoryProjects }
 }

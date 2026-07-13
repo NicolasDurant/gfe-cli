@@ -7,6 +7,7 @@ const command: GluegunCommand = {
   run: async (toolbox) => {
     const { version } = toolbox
     intro('🩺 The GFE doctor is checking your system...')
+    // #region Check versions
     try {
       await version.compareAll([
         { name: 'composer', version: '>=18.0.0' },
@@ -16,6 +17,7 @@ const command: GluegunCommand = {
     } catch (error) {
       log.error(`Error checking versions: ${error.message}`)
     }
+    // #endregion
     outro('The doctor is slightly tired, but he is happy to help you! 😴')
   },
 }

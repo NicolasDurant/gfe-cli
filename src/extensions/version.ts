@@ -12,6 +12,12 @@ const tools: Tool[] = [
 ]
 
 module.exports = (toolbox: GluegunToolbox) => {
+  /**
+   * Compares the installed version of a tool with the required version.
+   * @param name The name of the tool to compare.
+   * @param version The required version of the tool.
+   * @returns A promise that resolves to a string message indicating the comparison result.
+   */
   async function compare(name: string, version: string): Promise<string> {
     const tool = tools.find((t) => t.name === name)
     // TODO: remove obviously
@@ -37,6 +43,12 @@ module.exports = (toolbox: GluegunToolbox) => {
     }
     return `${name} version ${versionInstalledCoerced} satisfies the required version ${version}.`
   }
+
+  /**
+   * Compares the installed versions of multiple tools with their required versions.
+   * @param tools An array of objects containing the name and required version of each tool to compare.
+   * @returns A promise that resolves when all comparisons are complete, logging the results to the console.
+   */
   async function compareAll(
     tools: { name: string; version: string }[]
   ): Promise<void> {

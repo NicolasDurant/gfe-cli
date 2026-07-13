@@ -1,5 +1,13 @@
 import { GluegunCommand } from 'gluegun'
-import { cancel, confirm, intro, log, outro } from '@clack/prompts'
+import {
+  cancel,
+  confirm,
+  intro,
+  log,
+  outro,
+  password,
+  text,
+} from '@clack/prompts'
 import type { GFEConfig, GFEProject, GFEProjectPaths } from '../types'
 
 const command: GluegunCommand = {
@@ -8,15 +16,17 @@ const command: GluegunCommand = {
   name: 'init',
   run: async (toolbox) => {
     const { filesystem, meta, print, gfe } = toolbox
-    // Get repositories
     try {
+      // #region System check
       const whoami = meta.src ? meta.src.replace('/src', '') : undefined
       if (!whoami) {
         throw new Error(
           'Could not determine the root directory of the repository.'
         )
       }
+      // #endregion
       intro("🛠️ Let's initialize the GFE cli configuration file (.gfe.json):")
+      // #region Check for existing configuration file
       if (filesystem.exists(`${whoami}/.gfe.json`)) {
         log.warning(
           `A GFE configuration file already exists at ${print.colors.warning(
@@ -32,14 +42,15 @@ const command: GluegunCommand = {
           return
         }
       }
+      // #endregion
+      const gfeConfig: GFEConfig = { projects: {} }
+      // #region Collect user repository projects
       const projects: GFEProject[] = await gfe.getProjects()
       const userRepositoryProjects: GFEProjectPaths =
         await gfe.collectUserRepositoryProjects(projects)
+      // #endregion
+      // #region Write configuration file
       if (Object.keys(userRepositoryProjects).length > 0) {
-        const gfeConfig: GFEConfig = {
-          projects: userRepositoryProjects,
-        }
-        filesystem.write(`${whoami}/.gfe.json`, gfeConfig, { jsonIndent: 2 })
         log.success('Found some matching projects:')
         const tableData: [string, string][] = Object.entries(
           userRepositoryProjects
@@ -47,11 +58,43 @@ const command: GluegunCommand = {
         print.table([['Name', 'Path'], ...tableData], {
           format: 'lean',
         })
+        gfeConfig.projects = userRepositoryProjects
       } else {
         log.info(
           'No supported projects found.\nYou can add them later by editing the .gfe.json file, or by re-running the initialization process.'
         )
       }
+      // #region Ask if the user wants to add Factorial configuration
+      const wantsFactorialConfig = await confirm({
+        message: 'Do you want to add Factorial?',
+      })
+      if (wantsFactorialConfig) {
+        const apiKey = await password({
+          message: 'Enter your Factorial API key:',
+          validate: (value) => {
+            if (!value || value.trim() === '') {
+              return 'API key cannot be empty.'
+            }
+            return undefined
+          },
+        })
+        const apiBaseUrl = await text({
+          message: 'Enter your Factorial API base URL:',
+          initialValue: 'https://api.factorialhr.com',
+          validate: (value) => {
+            if (!value || value.trim() === '') {
+              return 'API base URL cannot be empty.'
+            }
+            return undefined
+          },
+        })
+        gfeConfig.factorial = {
+          apiKey: String(apiKey),
+          apiBaseUrl: String(apiBaseUrl),
+        }
+      }
+      filesystem.write(`${whoami}/.gfe.json`, gfeConfig, { jsonIndent: 2 })
+      // #endregion
       outro(`Initialization complete!`)
     } catch (error) {
       log.error(

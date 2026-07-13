@@ -14,5 +14,9 @@ export type GFEProject = {
 }
 export type GFEProjectPaths = Record<string, string>
 export type GFEConfig = {
+  factorial?: {
+    apiKey: string
+    apiBaseUrl: string
+  }
   projects: GFEProjectPaths
 }
