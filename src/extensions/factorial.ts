@@ -23,7 +23,9 @@ function formatLocalDateTime(date: Date): string {
   const absoluteOffset = Math.abs(offsetMinutes)
   return (
     `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}` +
-    `T${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}` +
+    `T${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(
+      date.getSeconds()
+    )}` +
     `${sign}${pad(Math.floor(absoluteOffset / 60))}:${pad(absoluteOffset % 60)}`
   )
 }
@@ -43,9 +45,15 @@ function parseDateTime(input: string, reference = new Date()): string {
     const parsed = new Date(trimmed)
     if (Number.isNaN(parsed.getTime())) {
       throw new Error(
-        `Could not parse "${input}". Use HH:mm (e.g. 09:30) or a full ISO timestamp.`
+        `Could not parse "${input}". Use HH (e.g. 9), HH:mm (e.g. 09:30), or a full ISO timestamp.`
       )
     }
+    return formatLocalDateTime(parsed)
+  }
+  const hourOnlyMatch = /^(\d{1,2})$/.exec(trimmed)
+  if (hourOnlyMatch) {
+    const parsed = new Date(reference)
+    parsed.setHours(Number(hourOnlyMatch[1]), 0, 0, 0)
     return formatLocalDateTime(parsed)
   }
   const timeMatch = /^(\d{1,2}):(\d{2})(?::(\d{2}))?$/.exec(trimmed)
@@ -60,7 +68,7 @@ function parseDateTime(input: string, reference = new Date()): string {
     return formatLocalDateTime(parsed)
   }
   throw new Error(
-    `Could not parse "${input}". Use HH:mm (e.g. 09:30) or a full ISO timestamp.`
+    `Could not parse "${input}". Use HH (e.g. 9), HH:mm (e.g. 09:30), or a full ISO timestamp.`
   )
 }
 
@@ -169,9 +177,7 @@ module.exports = (toolbox: GluegunToolbox) => {
     }
 
     const email =
-      config.factorial?.email ??
-      credential?.login_email ??
-      credential?.email
+      config.factorial?.email ?? credential?.login_email ?? credential?.email
     if (!email) {
       throw new Error(
         'Could not determine your Factorial employee. Add factorial.email to .gfe.json with your work email.'
@@ -209,18 +215,23 @@ module.exports = (toolbox: GluegunToolbox) => {
     }
   ): Promise<FactorialShift> {
     const date = options.clockIn.slice(0, 10)
-    return request<FactorialShift>(config, 'POST', '/resources/attendance/shifts', {
-      body: {
-        employee_id: String(employeeId),
-        date,
-        clock_in: options.clockIn,
-        clock_out: options.clockOut,
-        workable: options.workable,
-        location_type: options.locationType,
-        observations: options.observations,
-        source: 'api',
-      },
-    })
+    return request<FactorialShift>(
+      config,
+      'POST',
+      '/resources/attendance/shifts',
+      {
+        body: {
+          employee_id: String(employeeId),
+          date,
+          clock_in: options.clockIn,
+          clock_out: options.clockOut,
+          workable: options.workable,
+          location_type: options.locationType,
+          observations: options.observations,
+          source: 'api',
+        },
+      }
+    )
   }
 
   /**

@@ -1,7 +1,7 @@
 import { GluegunToolbox } from 'gluegun'
 import { intro, log, outro } from '@clack/prompts'
 
-async function run(toolbox: GluegunToolbox) {
+async function run(toolbox: GluegunToolbox): Promise<void> {
   const { factorial, gfe } = toolbox
 
   try {
@@ -29,9 +29,11 @@ async function run(toolbox: GluegunToolbox) {
   }
 }
 
-module.exports = {
+const command = {
   name: 'factorial--clock',
   hidden: true,
   description: 'Toggle your Factorial attendance shift (clock in/out now)',
   run,
 }
+
+export default command
