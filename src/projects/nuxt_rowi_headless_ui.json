@@ -3,10 +3,11 @@
     "alias": "ROWI Frontend",
     "command": "rowi",
     "repository": {
-        "type": "git",
-        "url": "",
+        "monorepo": "frontend",
+        "ssh": "git@github.com:GFEMediaGmbH/nuxt_rowi_headless_ui.git",
         "targetBranch": "develop",
-        "monorepo": "frontend"
+        "type": "git",
+        "url": "https://github.com/GFEMediaGmbH/nuxt_rowi_headless_ui"
     },
     "requirements": {
         "node": ">=18.0.0"
