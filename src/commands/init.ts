@@ -116,7 +116,7 @@ const command: GluegunCommand = {
       }
       filesystem.write(`${packageRoot}/.gfe.json`, gfeConfig, { jsonIndent: 2 })
       // #endregion
-      outro(`Initialization complete!`)
+      outro(`Initialization complete! 🚀`)
     } catch (error) {
       if (error?.message === userCanceledMessage) {
         cancel(userCanceledMessage)

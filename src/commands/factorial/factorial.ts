@@ -169,11 +169,8 @@ const command: GluegunCommand = {
         locationType,
       })
       const label = shiftType === 'work' ? 'Working time' : 'Break'
-      log.success(
-        `${label} tracked from ${shift.clock_in} to ${shift.clock_out}`
-      )
       // #endregion
-      outro()
+      outro(`${label} tracked from ${shift.clock_in} to ${shift.clock_out}! 🚀`)
     } catch (error) {
       const message =
         error instanceof Error ? error.message : 'Unknown error occurred.'
