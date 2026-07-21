@@ -1,6 +1,6 @@
 import * as path from 'path'
 import { GluegunToolbox } from 'gluegun'
-import { path as clackPath, select } from '@clack/prompts'
+import { isCancel, path as clackPath, select } from '@clack/prompts'
 import type { GFEConfig, GFEProject, GFEProjectPaths } from '../types'
 
 module.exports = (toolbox: GluegunToolbox) => {
@@ -75,6 +75,9 @@ module.exports = (toolbox: GluegunToolbox) => {
       root: filesystem.homedir(),
       directory: true,
     })
+    if (isCancel(repositoriesPath)) {
+      throw new Error('Initialization canceled by user.')
+    }
     if (typeof repositoriesPath !== 'string') {
       throw new Error('Invalid path provided.')
     }
@@ -120,6 +123,9 @@ module.exports = (toolbox: GluegunToolbox) => {
           },
         ],
       })
+      if (isCancel(noGFERepositoriesPrompt)) {
+        throw new Error('Initialization canceled by user.')
+      }
       if (noGFERepositoriesPrompt === 'abort') {
         throw new Error('Initialization canceled by user.')
       } else if (noGFERepositoriesPrompt === 'reselect') {

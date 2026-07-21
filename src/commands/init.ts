@@ -3,6 +3,7 @@ import {
   cancel,
   confirm,
   intro,
+  isCancel,
   log,
   outro,
   password,
@@ -16,6 +17,7 @@ const command: GluegunCommand = {
   name: 'init',
   run: async (toolbox) => {
     const { filesystem, print, gfe } = toolbox
+    const userCanceledMessage = 'Initialization canceled by user.'
     try {
       const packageRoot = gfe.getPackageRoot()
       intro("🛠️ Let's initialize the GFE cli configuration file (.gfe.json):")
@@ -30,8 +32,8 @@ const command: GluegunCommand = {
           message:
             'Do you want to continue? (This will overwrite the existing file)',
         })
-        if (!hasConfirmedOverwrite) {
-          cancel('Initialization canceled by user.')
+        if (isCancel(hasConfirmedOverwrite) || !hasConfirmedOverwrite) {
+          cancel(userCanceledMessage)
           return
         }
       }
@@ -61,6 +63,10 @@ const command: GluegunCommand = {
       const wantsFactorialConfig = await confirm({
         message: 'Do you want to add Factorial?',
       })
+      if (isCancel(wantsFactorialConfig)) {
+        cancel(userCanceledMessage)
+        return
+      }
       if (wantsFactorialConfig) {
         const apiKey = await password({
           message: 'Enter your Factorial API key:',
@@ -71,6 +77,10 @@ const command: GluegunCommand = {
             return undefined
           },
         })
+        if (isCancel(apiKey)) {
+          cancel(userCanceledMessage)
+          return
+        }
         const apiBaseUrl = await text({
           message: 'Enter your Factorial API base URL:',
           initialValue: 'https://api.factorialhr.com',
@@ -81,6 +91,10 @@ const command: GluegunCommand = {
             return undefined
           },
         })
+        if (isCancel(apiBaseUrl)) {
+          cancel(userCanceledMessage)
+          return
+        }
         const email = await text({
           message: 'Enter your Factorial work email:',
           validate: (value) => {
@@ -90,16 +104,24 @@ const command: GluegunCommand = {
             return undefined
           },
         })
+        if (isCancel(email)) {
+          cancel(userCanceledMessage)
+          return
+        }
         gfeConfig.factorial = {
-          apiKey: String(apiKey),
-          apiBaseUrl: String(apiBaseUrl),
-          email: String(email),
+          apiKey,
+          apiBaseUrl,
+          email,
         }
       }
       filesystem.write(`${packageRoot}/.gfe.json`, gfeConfig, { jsonIndent: 2 })
       // #endregion
       outro(`Initialization complete!`)
     } catch (error) {
+      if (error?.message === userCanceledMessage) {
+        cancel(userCanceledMessage)
+        return
+      }
       log.error(
         `Error initializing GFE cli: ${print.colors.error(error.message)}`
       )
